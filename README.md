@@ -11,5 +11,5 @@ Post-install script for Hetzner's `installimage` that installs `dracut-sshd` to 
   - `systemd-networkd` is configured to use DHCP on all Ethernet interfaces
   - Although NetworkManager would probably also work with the implicitly installed `dracut-network`, we use `systemd-networkd` here because it’s our preferred option.
 - Enables EPEL (required for `dracut-sshd` and `systemd-networkd`)
-- Installs dracut-sshd
+- Installs `dracut-sshd`
   - Uses the SSH keys in `/root/.ssh/authorized_keys`, as previously installed by `installimage`
