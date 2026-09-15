@@ -3,8 +3,6 @@
 set -euo pipefail
 
 
-have_cmd() { command -v "$1" &>/dev/null; }
-
 enable_epel() {
   echo "Enable CodeReady Builder repository..."
   dnf config-manager --set-enabled crb
