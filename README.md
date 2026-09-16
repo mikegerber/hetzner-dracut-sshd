@@ -8,6 +8,8 @@ unlocking via SSH.
 This is tested with Rocky Linux 10. It should also work with AlmaLinux 10 and possibly earlier
 releases, but these have not been tested.
 
+Not written by Hetzner, it's written *for* (installing Rocky Linux servers at) Hetzner.
+
 
 ## Notes
 
