@@ -31,7 +31,7 @@ releases, but these have not been tested.
 - Always check `/root/postinstall_debug.txt` after `postinstall` ran.
 - It's not specific to this postinstall script, but make sure you know how to mount an encrypted
   system from the rescue disk using `mdadm`, `cryptsetup`, `lvscan` etc. Also remember to `touch
-  `/path-to/mounted-system/.autorelabel` after tinkering, to not break booting due to SELinux
+  /path-to/mounted-system/.autorelabel` after tinkering, to not break booting due to SELinux
   choking on unlabeled files.
 - Be sure to regenerate your initramfs if you changed anything substantial, e.g. NetworkManager
   configuration.
