@@ -2,14 +2,33 @@
 
 🚧 **Work in progress** 🚧
 
-Post-install script for Hetzner's `installimage` that installs `dracut-sshd` to enable remote LUKS unlocking via SSH. Tested with Rocky Linux 10. It should also work with AlmaLinux 10 and possibly earlier releases, but these have not been tested.
+Post-install script for Hetzner's `installimage` that installs `dracut-sshd` to enable remote LUKS
+unlocking via SSH.
+
+This is tested with Rocky Linux 10. It should also work with AlmaLinux 10 and possibly earlier
+releases, but these have not been tested.
+
 
 ## Notes
 
-- The script assumes a setup with LVM on RAID1, but this is not a strict requirement. Other setups may require small changes to the script.
-- Replaces NetworkManager with `systemd-networkd` and installs `systemd-resolved`
-  - `systemd-networkd` is configured to use DHCP on all Ethernet interfaces
-  - Although NetworkManager would probably also work with the implicitly installed `dracut-network`, we use `systemd-networkd` here because it’s our preferred option.
-- Enables EPEL (required for `dracut-sshd` and `systemd-networkd`)
+- The script assumes a setup with LVM on LUKS on RAID1, but this is not a strict requirement. Other
+  setups may require small changes to the script.
+- Configures the initramfs to enable networking (e.g. NetworkManager) in early boot
+  - `dracut-network`, NetworkManager in the initramfs and `rd.neednet=1` in the kernel cmdline
+- Enables EPEL (required for `dracut-sshd`)
 - Installs `dracut-sshd`
   - Uses the SSH keys in `/root/.ssh/authorized_keys`, as previously installed by `installimage`
+- Always check `/root/postinstall_debug.txt` after `installimage` ran.
+
+### After rebooting out of the rescue system
+
+- The system reboots again after first boot due to SELinux autorelabeling. That means that you will
+  need to ssh into the initrd to unlock *twice* if it's the first time.
+
+### Troubleshooting
+
+- Always check `/root/postinstall_debug.txt` after `postinstall` ran.
+- It's not specific to this postintall script, but make sure you know how to mount an encrypted
+  system from the rescue disk using `mdadm`, `cryptsetup`, `lvscan` etc. Also remember to `touch
+  `/path-to/mounted-system/.autorelabel` to not break booting due to SELinux choking on unlabeled
+  files.

@@ -23,34 +23,11 @@ install_storage_deps() {
   dnf -y install mdadm cryptsetup lvm2
 }
 
-write_network_file() {
-  mkdir -p /etc/systemd/network
-  local f="/etc/systemd/network/20-wired.network"
-  cat > "$f" <<'EOF'
-[Match]
-Type=ether
-
-[Network]
-DHCP=yes
-EOF
-  chmod 0644 "$f"
-  echo "Wrote $f"
-}
-
-disable_networkmanager() {
-  systemctl disable NetworkManager.service || true
-  systemctl disable NetworkManager-wait-online.service || true
-  systemctl mask NetworkManager.service || true
-  echo "NetworkManager disabled and masked."
-}
-
-enable_networkd_and_resolved() {
-  dnf -y install systemd-networkd systemd-resolved
-  systemctl enable systemd-networkd.service
+enable_resolved() {
+  dnf -y install systemd-resolved
   systemctl enable systemd-resolved.service
-  echo "Enabled systemd-networkd and systemd-resolved."
+  echo "Enabled systemd-resolved."
 }
-
 
 configure_dracut() {
   local f="/etc/dracut.conf.d/10-raid1-luks.conf"
@@ -61,21 +38,25 @@ EOF
   chmod 0644 "$f"
   echo "Wrote $f"
 
-  local f="/etc/dracut.conf.d/90-networkd.conf"
+  local f="/etc/dracut.conf.d/90-network-manager.conf"
   cat > "$f" <<'EOF'
-install_items+=" /etc/systemd/network/20-wired.network "
-add_dracutmodules+=" systemd-networkd "
-omit_dracutmodules+=" network-manager "
+hostonly="yes"
+add_dracutmodules+=" network-manager "
 EOF
   chmod 0644 "$f"
   echo "Wrote $f"
 
-  echo "Configured initrd for lvm on luks on raid1, systemd-networkd."
+  echo "Configured initrd for lvm on luks on raid1, network-manager."
+}
+
+configure_kernel_cmdline() {
+  # We need to tell the initramfs(= rd) that we need network during early boot
+  grubby --update-kernel=ALL --args="rd.neednet=1"
 }
 
 enable_dracut_sshd() {
-  dnf -y install dracut-sshd
-  echo "Enabled dracut-sshd."
+  dnf -y install dracut-network dracut-sshd
+  echo "Enabled dracut-network, dracut-sshd."
 }
 
 regenerate_initrd() {
@@ -99,7 +80,7 @@ check_initrd() {
     local tmpo=`mktemp`
     lsinitrd $initrd &>$tmpo
 
-    for should_be in root/.ssh/authorized_keys bin/sshd usr/lib/systemd/systemd-networkd\$ etc/systemd/network/20-wired.network raid1.ko.xz dm-crypt.ko.xz usr/lib/systemd/system/cryptsetup.target bin/lvm\$ bin/mdadm\$ etc/ssh/ssh_host_ed25519_key; do
+    for should_be in root/.ssh/authorized_keys bin/sshd raid1.ko.xz dm-crypt.ko.xz usr/lib/systemd/system/cryptsetup.target bin/lvm\$ bin/mdadm\$ etc/ssh/ssh_host_ed25519_key sbin/NetworkManager\$; do
       if grep -q "$should_be" $tmpo; then
         echo "${green}OK: $should_be${reset}"
       else
@@ -127,11 +108,10 @@ main() {
 
   install_storage_deps
 
-  write_network_file
-  enable_networkd_and_resolved
-  disable_networkmanager
+  enable_resolved
 
   configure_dracut
+  configure_kernel_cmdline
 
   enable_dracut_sshd
 
