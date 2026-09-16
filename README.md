@@ -15,6 +15,7 @@ releases, but these have not been tested.
   setups may require small changes to the script.
 - Configures the initramfs to enable networking (e.g. NetworkManager) in early boot
   - `dracut-network`, NetworkManager in the initramfs and `rd.neednet=1` in the kernel cmdline
+  - Reuses the static IP configuration that `installimage` configures (via `dracut-network`)
 - Enables EPEL (required for `dracut-sshd`)
 - Installs `dracut-sshd`
   - Uses the SSH keys in `/root/.ssh/authorized_keys`, as previously installed by `installimage`
