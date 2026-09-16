@@ -2,8 +2,8 @@
 
 🚧 **Work in progress** 🚧
 
-Post-install script for Hetzner's `installimage` that installs `dracut-sshd` to enable remote LUKS
-unlocking via SSH.
+Post-install script for Hetzner's `installimage` on dedicated servers that installs `dracut-sshd` to
+enable remote LUKS unlocking via SSH.
 
 This is tested with Rocky Linux 10. It should also work with AlmaLinux 10 and possibly earlier
 releases, but these have not been tested.
